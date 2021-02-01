@@ -114,4 +114,42 @@ class ResumeController extends AbstractController
         
         return new JsonResponse(['updated' => $data], Response::HTTP_OK);
     }
+
+    /**
+     * @Route("/api/cv/{id}/edit", name="change_resume_date", methods={"POST"})
+     */
+    public function changeResumeData($id, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $resume = $entityManager->getRepository(Resume::class)->find($id);
+
+
+        // $resume = $this->getDoctrine()
+        // ->getRepository(Resume::class)
+        // ->find($id);
+
+        if (!$resume) {
+            return new JsonResponse(['updated' => 'false'], Response::HTTP_NOT_FOUND);
+        }
+
+        $resume->setFullname($data['name'])
+        ->setCity($data['city'])
+        ->setEmail($data['email'])
+        ->setPhoneNumber($data['phoneNumber'])
+        ->setResumeStatus($data['status'])
+        ->setProfession($data['profession'])
+        ->setImageURL($data['photoURL'])
+        ->setDateBirth(\DateTime::createFromFormat('Y-m-d', $data['birthday']))
+        ->setEducationType($data['educationType'])
+        ->setEducationList($data['educationList'])
+        ->setSalary($data['salary'])
+        ->setSkills($data['skills'])
+        ->setAbout($data['about']);
+
+        $entityManager->flush();
+        
+        return new JsonResponse(['update_resume' => $resume->toArray()], Response::HTTP_OK);
+    }
 }
