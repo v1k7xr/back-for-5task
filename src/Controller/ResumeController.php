@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Resume;
 use App\Repository\ResumeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ResumeController extends AbstractController
 {
@@ -67,8 +68,31 @@ class ResumeController extends AbstractController
     public function addResume(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $resume = new Resume();
+
+        $resume->setFullname($data['name'])
+        ->setCity($data['city'])
+        ->setEmail($data['email'])
+        ->setPhoneNumber($data['phoneNumber'])
+        ->setResumeStatus($data['status'])
+        ->setProfession($data['profession'])
+        ->setImageURL($data['photoURL'])
+        ->setDateBirth(\DateTime::createFromFormat('Y-m-d', $data['birthday']))
+        ->setEducationType($data['educationType'])
+        ->setEducationList($data['educationList'])
+        ->setSalary($data['salary'])
+        ->setSkills($data['skills'])
+        ->setAbout($data['about']);
+
+        $entityManager->persist($resume);
+
+        // actually executes the queries (i.e. the INSERT query)
+        $entityManager->flush();
         
-        return new JsonResponse(['resume' => $data], Response::HTTP_OK);
+        return new JsonResponse(['result' => 'ok'], Response::HTTP_OK);
     }
 
     /**
